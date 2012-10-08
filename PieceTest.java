@@ -17,6 +17,7 @@ public class PieceTest {
 	private Piece pyr1, pyr2, pyr3, pyr4;
 	private Piece s, sRotated;
 
+	
 	@Before
 	public void setUp() throws Exception {
 		
@@ -41,11 +42,31 @@ public class PieceTest {
 		// Effectively we're testing size and rotation code here
 		assertEquals(2, pyr2.getWidth());
 		assertEquals(3, pyr2.getHeight());
+		assertPieceEquals(pyr2, new Piece("0 1 1 0 1 1 1 2"));
 		
 		// Now try with some other piece, made a different way
 		Piece l = new Piece(Piece.STICK_STR);
 		assertEquals(1, l.getWidth());
 		assertEquals(4, l.getHeight());
+	}
+	
+	@Test
+	public void testFastRotation() {
+		assertNotNull(Piece.getPieces()[Piece.SQUARE].fastRotation());
+		
+		assertEquals(Piece.getPieces()[Piece.SQUARE].fastRotation(), Piece.getPieces()[Piece.SQUARE]);
+		assertTrue(!Piece.getPieces()[Piece.STICK].fastRotation().equals(Piece.getPieces()[Piece.STICK]));
+		assertEquals(Piece.getPieces()[Piece.STICK].fastRotation().fastRotation(), Piece.getPieces()[Piece.STICK]);
+		
+		assertPieceEquals(Piece.getPieces()[Piece.L1].fastRotation().fastRotation(), new Piece("0 2 1 0 1 1 1 2"));
+		assertEquals(Piece.getPieces()[Piece.L1].fastRotation().fastRotation().fastRotation().fastRotation(),
+				Piece.getPieces()[Piece.L1]);
+	}
+	
+	@Test
+	public void testSlowRotation() {
+		assertPieceEquals(Piece.getPieces()[Piece.SQUARE], (new Piece("0 0 1 0 0 1 1 1").computeNextRotation()));
+		assertPieceEquals(Piece.getPieces()[Piece.L1].computeNextRotation().computeNextRotation(), new Piece("0 2 1 0 1 1 1 2"));
 	}
 	
 	
@@ -61,5 +82,10 @@ public class PieceTest {
 		assertTrue(Arrays.equals(new int[] {1, 0}, sRotated.getSkirt()));
 	}
 	
+	private static void assertPieceEquals(Piece p1, Piece p2) {
+		if(!p1.equals(p2)) 
+			assert false : "Pieces not equal: " + p1.printBody() + " " + p2.printBody();
+	}
 	
-}
+	
+} 

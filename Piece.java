@@ -34,7 +34,25 @@ public class Piece {
 	 Makes its own copy of the array and the TPoints inside it.
 	*/
 	public Piece(TPoint[] points) {
-		// YOUR CODE HERE
+		if(points.length == 0) {
+			width = 0;
+			height = 0;
+			skirt = new int[0];
+			next = this;
+		} else {		
+			body = points.clone();
+
+			for(TPoint p : body) {
+				if(p.x + 1> width) width = p.x + 1;
+				if(p.y  + 1 > height) height = p.y + 1;	
+			}
+
+			skirt = new int[width];
+			for(int i = 0; i < width; i++) skirt[i] = Integer.MAX_VALUE;
+			for(TPoint p : body) {
+				if(p.y < skirt[p.x]) skirt[p.x] = p.y;
+			}
+		}
 	}
 	
 
@@ -87,8 +105,11 @@ public class Piece {
 	 rotated from the receiver.
 	 */
 	public Piece computeNextRotation() {
-		// YOUR CODE HERE
-		return null; // YOUR CODE HERE
+		TPoint[] next = new TPoint[this.body.length];
+		for(int i = 0; i < next.length; i++) {
+			next[i] = new TPoint(height - 1 - body[i].y, body[i].x);
+		}
+		return new Piece(next);
 	}
 
 	/**
@@ -111,6 +132,7 @@ public class Piece {
 	 in the same order in the bodies. Used internally to detect
 	 if two rotations are effectively the same.
 	*/
+	@Override
 	public boolean equals(Object obj) {
 		// standard equals() technique 1
 		if (obj == this) return true;
@@ -120,8 +142,27 @@ public class Piece {
 		if (!(obj instanceof Piece)) return false;
 		Piece other = (Piece)obj;
 		
-		// YOUR CODE HERE
+		if(other.body.length != this.body.length ||
+				other.width != this.width ||
+				other.height != this.height) return false;
+		
+		Set<TPoint> points = new HashSet<TPoint>();
+		for(TPoint p : this.body) {
+			points.add(p);
+		}
+		for(TPoint p : other.body) {
+			if(!points.contains(p)) return false;
+		}
+		
 		return true;
+	}
+	
+	public String printBody() {
+		String s = "";
+		for(TPoint p : body) {
+			s += p.x + " " + p.y + " ";
+		}
+		return s;
 	}
 
 
@@ -142,6 +183,8 @@ public class Piece {
 	public static final int S2	  = 4;
 	public static final int SQUARE	= 5;
 	public static final int PYRAMID = 6;
+	
+	public static final int NUM_TYPES = 7;
 	
 	/**
 	 Returns an array containing the first rotation of
@@ -187,10 +230,19 @@ public class Piece {
 	 to the first piece.
 	*/
 	private static Piece makeFastRotations(Piece root) {
-		// YOUR CODE HERE
-		return null; // YOUR CODE HERE
+		if(root.next != null) return root;
+		Piece curr = root;
+		while(true) {
+			Piece next = curr.computeNextRotation();
+			if(root.equals(next)) {
+				curr.next = root;
+				break;
+			}
+			curr.next = next;
+			curr = next;
+		}
+		return root;	
 	}
-	
 	
 
 	/**
