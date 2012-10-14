@@ -335,7 +335,7 @@ public class JTetris extends JComponent {
 	/**
 	 Updates the count/score labels with the latest values.
 	 */
-	private void updateCounters() {
+	protected void updateCounters() {
 		countLabel.setText("Pieces " + count);
 		scoreLabel.setText("Score " + score);
 	}

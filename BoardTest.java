@@ -72,14 +72,17 @@ public class BoardTest {
 	public void testStickUndo() {
 		b.commit();
 		
+		
 		int dropHeight = b.dropHeight(stickRotated, 0);
 		assertEquals(2, dropHeight);
 		assertEquals(Board.PLACE_ROW_FILLED, b.place(stickRotated, 0, dropHeight));
+		
 		assertEquals(4, b.getRowWidth(2));
 		assertEquals(3, b.getColumnHeight(1));
 		assertEquals(3, b.getColumnHeight(3));
 		
 		b.undo();
+		
 		assertEquals(0, b.getRowWidth(2));
 		assertEquals(2, b.getColumnHeight(1));
 		assertEquals(0, b.getColumnHeight(3));
@@ -89,12 +92,27 @@ public class BoardTest {
 	public void testStickClearRows() {
 		b.commit();
 		b.place(stickRotated, 0, 2);
+		
 		assertEquals(1, b.clearRows());
+		
 		assertEquals(0, b.getRowWidth(2));
 		assertEquals(2, b.getColumnHeight(1));
 		assertEquals(0, b.getColumnHeight(3));
 		
 		b.commit();
+	}
+	
+	@Test
+	public void testClearAndUndo() {
+		b.commit();
+		assertEquals(Board.PLACE_ROW_FILLED, b.place(stick, 3, 0));
+		assertEquals(1, b.clearRows());
+		assertEquals(0, b.getColumnHeight(0));
+		assertEquals(1, b.getColumnHeight(1));
+		assertEquals(3, b.getColumnHeight(3));
+		
+		b.undo();
+		
 	}
 	
 	@Test

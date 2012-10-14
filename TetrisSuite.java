@@ -5,6 +5,7 @@ import org.junit.runner.*;
 @Suite.SuiteClasses({
 		PieceTest.class,
 		BoardTest.class,
+		BrainTest.class,
 })
 public class TetrisSuite {
 	//empty

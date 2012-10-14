@@ -18,19 +18,8 @@ public class Board	{
 	private int[] filled;
 	private int[] heights;
 	
-	private enum State { TRUE, FALSE, BACKED_UP }
-	private class Move {
-		public Piece piece;
-		public int x, y;
-		public Move(Piece p, int a, int b) {
-			piece = p;
-			x = a;
-			y = b;
-		}
-	}
-	
-	private State committed;
-	private Move last;
+	private boolean committed;
+	private boolean placed;
 	private boolean[][] gridBackup;
 	private int[] filledBackup;
 	private int[] heightsBackup;
@@ -50,11 +39,11 @@ public class Board	{
 		filled = new int[height];
 		heights = new int[width];
 		
-		committed = State.TRUE;
+		committed = true;
+		placed = false;
 		gridBackup = new boolean[width][height];
 		filledBackup = new int[height];
 		heightsBackup = new int[width];
-		last = new Move(new Piece(""), 0, 0);
 	}
 	
 	
@@ -93,7 +82,27 @@ public class Board	{
 	*/
 	public void sanityCheck() {
 		if (DEBUG) {
-			// YOUR CODE HERE
+			for(int i = 0; i < height; i++) {
+				int count = 0;
+				for(int j = 0; j < width; j++) {
+					if(getGrid(j, i)) count++;
+				}
+				if(count != filled[i])
+					System.err.println("filled inaccurate at y= " + i);
+			}
+			for(int j = 0; j < width; j++) {
+				boolean empty = true;
+				for(int i = height - 1; i >= 0; i--) {
+					if(empty && getGrid(j,i)) {
+						empty = false;
+						if(i + 1 != heights[j]) { 
+							System.out.println("heights inaccurate at x= " + j);
+						}
+					}
+				}
+				if(empty && heights[j] != 0)
+					System.err.println("heights not 0 at x= " + j);
+			}
 		}
 	}
 	
@@ -179,7 +188,7 @@ public class Board	{
 	*/
 	public int place(Piece piece, int x, int y) {
 		// flag !committed problem
-		if (committed != State.TRUE) throw new RuntimeException("place commit problem");
+		if (!committed) throw new RuntimeException("place commit problem");
 		
 		if(x < 0 || y < 0 || x + piece.getWidth() > width || y + piece.getHeight() > height) 
 			return PLACE_OUT_BOUNDS;
@@ -187,10 +196,10 @@ public class Board	{
 			if(grid[p.x + x][p.y + y]) return PLACE_BAD;
 		}
 		
-		committed = State.FALSE;
-		last = new Move(piece, x, y);
+		committed = false;
+		placed = true;
+		backup();
 		
-		System.arraycopy(heights, 0, heightsBackup, 0, heights.length);
 		for(TPoint p : piece.getBody()) {
 			grid[p.x + x][p.y + y] = true;
 			filled[p.y + y]++;
@@ -198,8 +207,12 @@ public class Board	{
 				heights[p.x + x] = p.y + y + 1;
 		}
 		for(int i = y; i < y + piece.getHeight(); i++) {
-			if(filled[i] == width) return PLACE_ROW_FILLED;
+			if(filled[i] == width) {
+				return PLACE_ROW_FILLED;
+			}
 		}
+		
+		sanityCheck();
 		
 		return PLACE_OK;
 	}
@@ -210,8 +223,7 @@ public class Board	{
 	 things above down. Returns the number of rows cleared.
 	*/
 	public int clearRows() {
-		committed = State.FALSE;
-		backup();
+		if(!placed) backup();
 		
 		int rowsCleared = 0;
 		
@@ -258,29 +270,23 @@ public class Board	{
 	 See the overview docs.
 	*/
 	public void undo() {
-		if(committed == State.TRUE) return;
+		if(committed) return;
 		else {
 			int[] temp3 = heights;
 			heights = heightsBackup;
 			heightsBackup = temp3;	
-		
-			if(committed == State.BACKED_UP) {
-				boolean[][] temp1 = grid;
-				grid = gridBackup;
-				gridBackup = temp1;
+			
+			boolean[][] temp1 = grid;
+			grid = gridBackup;
+			gridBackup = temp1;
 
-				int[] temp2 = filled;
-				filled = filledBackup;
-				filledBackup = temp2;		
-			} else {
-				for(TPoint point : last.piece.getBody()) {
-					grid[point.x + last.x][point.y + last.y] = false;
-					filled[point.y + last.y]--;
-				}
-			}
+			int[] temp2 = filled;
+			filled = filledBackup;
+			filledBackup = temp2;		
 		}
 		
-		committed = State.TRUE;
+		committed = true;
+		sanityCheck();
 	}
 	
 	private void backup() {
@@ -292,9 +298,6 @@ public class Board	{
 				gridBackup[i][j] = grid[i][j];
 			}
 		}
-		if(committed == State.FALSE) {
-			committed = State.BACKED_UP;
-		}
 	}
 	
 	
@@ -302,7 +305,8 @@ public class Board	{
 	 Puts the board in the committed state.
 	*/
 	public void commit() {
-		committed = State.TRUE;
+		committed = true;
+		placed = false;
 	}
 
 
