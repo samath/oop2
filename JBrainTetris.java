@@ -6,14 +6,17 @@ import javax.swing.*;
 
 
 public class JBrainTetris extends JTetris {
+	static final long serialVersionUID = 1L;
 	
+	// Additional Swing components.
 	protected JCheckBox brainMode;
 	protected JCheckBox fallingMode;
 	protected JSlider adversary;
-	protected DefaultBrain brain;
 	
+	protected DefaultBrain brain;
 	private Random gen;
 	
+	//Stores the Brains selected move for the current piece.
 	private Brain.Move nextMove;
 
 	JBrainTetris(int pixels) {
@@ -53,6 +56,7 @@ public class JBrainTetris extends JTetris {
 			board.undo();	// remove the piece from its old position
 		}
 		
+		// Try to make the brain's move in sequence, and update currentXXX along the way.
 		if(verb == DOWN && nextMove != null && brainMode.isSelected()) {
 			if(!nextMove.piece.equals(currentPiece)) {
 				tryMove(ROTATE);				
@@ -126,6 +130,7 @@ public class JBrainTetris extends JTetris {
 		moved = (!failed && verb!=DOWN);
 	}
 	
+	//Check if the move is valid, then update values and undo.
 	private void tryMove(int verb) {
 		computeNewPosition(verb);
 		int result = board.place(newPiece, newX, newY);
@@ -141,6 +146,11 @@ public class JBrainTetris extends JTetris {
 		currentY = newY;
 	}
 	
+	/** Select and add a new piece to the board.
+	 * Overwritten by JBrainTetris to allow the brain to set nextMove.
+	 * nextMove must be set before the currentPiece is updated, or else
+	 * the original placement will be committed.
+	 */
 	@Override
 	public void addNewPiece() {
 		count++;
@@ -175,6 +185,10 @@ public class JBrainTetris extends JTetris {
 		updateCounters();
 	}
 	
+	/**
+	 * Choose the next piece to place on the board.
+	 * Overridden by JBrainTetris to allow the adversary to act.
+	 */
 	@Override
 	public Piece pickNextPiece() {
 		boolean random = (adversary.getValue() < gen.nextInt(adversary.getMaximum()));

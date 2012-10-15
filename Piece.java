@@ -122,7 +122,18 @@ public class Piece {
 		return next;
 	}
 	
-
+	/** Auto-generated hashCode for Piece. */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(body);
+		result = prime * result + height;
+		result = prime * result + ((next == null) ? 0 : next.hashCode());
+		result = prime * result + Arrays.hashCode(skirt);
+		result = prime * result + width;
+		return result;
+	}
 
 	/**
 	 Returns true if two pieces are the same --
@@ -155,14 +166,6 @@ public class Piece {
 		}
 		
 		return true;
-	}
-	
-	public String printBody() {
-		String s = "";
-		for(TPoint p : body) {
-			s += p.x + " " + p.y + " ";
-		}
-		return s;
 	}
 
 

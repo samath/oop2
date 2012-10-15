@@ -36,6 +36,8 @@ import java.awt.Toolkit;
 */
 
 public class JTetris extends JComponent {
+	static final long serialVersionUID = 1L;
+	
 	// size of the board in blocks
 	public static final int WIDTH = 10;
 	public static final int HEIGHT = 20;
